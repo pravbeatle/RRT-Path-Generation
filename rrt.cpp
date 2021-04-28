@@ -5,6 +5,7 @@ RRT::RRT() {
     total_nodes = 0;
     reached = false;
     step_size = 10;
+    exploration_factor = 90;
 
     image = imread("./map.png", CV_LOAD_IMAGE_COLOR);
 
@@ -15,10 +16,10 @@ RRT::RRT() {
     set_color(start->position, 5, 255, 0, 0); // set start node to blue
     nodes[total_nodes++] = start;
 
-    end = new Node;
-    end->position.x = 300;
-    end->position.y = 300;
-    set_color(end->position, 5, 0, 255, 0);   // set end node to green
+    goal = new Node;
+    goal->position.x = 300;
+    goal->position.y = 300;
+    set_color(goal->position, 5, 0, 255, 0);   // set goal node to green
 
     srand(time(NULL));  // calling time with NULL returns the current system time
 }
@@ -171,8 +172,8 @@ bool RRT::check_path_along_width(coordinates &q1, coordinates &q2) {
 void RRT::draw_path() {
     // begin from goal node and trace a way back to start node
     Node *top, *bottom;
-    bottom = end;
-    top = end->parent;
+    bottom = goal;
+    top = goal->parent;
 
     // loop until we reach start node
     while(top->parent) {
@@ -183,14 +184,18 @@ void RRT::draw_path() {
     }
 }
 
-void RRT::add_node() {
+void RRT::add_node(int exp) {
     // generate node at random position, take a step towards it from nearest node in tree
     // and add to tree if straight line between step node and near node free of obstacles
     Node* q_rand = new Node;
     Node* q_step = new Node;
 
-    q_rand->position.x = rand() % WIDTH + 1;
-    q_rand->position.y = rand() % HEIGHT + 1;
+    if (exp > exploration_factor) {
+      q_rand = goal;
+    } else {
+      q_rand->position.x = rand() % WIDTH + 1;
+      q_rand->position.y = rand() % HEIGHT + 1;
+    }
 
     int q_near_index = find_nearest_node(q_rand);
     if (calculate_distance(q_rand->position, nodes[q_near_index]->position) < step_size)
@@ -207,11 +212,11 @@ void RRT::add_node() {
 
       // set_color(q_step->position, 2.0, 0, 255, 0);  // yellow marking of step nodes
 
-      if( check_path_along_height(q_step->position, end->position) && check_path_along_width(q_step->position, end->position) && (calculate_distance(q_step->position, end->position) < step_size) ) {
+      if( check_path_along_height(q_step->position, goal->position) && check_path_along_width(q_step->position, goal->position) && (calculate_distance(q_step->position, goal->position) < step_size) ) {
         reached = true;
-        nodes[total_nodes++] = end;
-        end->parent = q_step;
-        nodes[total_nodes-1]->children.push_back(end);
+        nodes[total_nodes++] = goal;
+        goal->parent = q_step;
+        nodes[total_nodes-1]->children.push_back(goal);
         draw_path();
       }
     }
@@ -221,8 +226,12 @@ void RRT::add_node() {
 int main() {
     RRT rrt = RRT();
 
+    random_device rd;  //Will be used to obtain a seed for the random number engine
+    mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    uniform_int_distribution<> unif_dist(1, 100);
+
     while(!rrt.reached)
-      rrt.add_node();
+      rrt.add_node(unif_dist(gen));
 
     namedWindow("RRT Path Generation", WINDOW_AUTOSIZE);
     imshow("RRT Path Generation", rrt.image);

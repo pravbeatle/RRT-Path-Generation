@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <math.h>
+#include <random>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -44,13 +45,14 @@ class RRT {
     bool check_path_along_height(coordinates &q1, coordinates &q2);
     bool check_path_along_width(coordinates &q1, coordinates &q2);
     void draw_path();
-    void add_node();
+    void add_node(int exp);
 
     Node* start;
-    Node* end;
+    Node* goal;
     Node* nodes[MAX_NODES];
     int total_nodes;
     bool reached;
+    int exploration_factor;
     int step_size;
     Mat image;
 };
