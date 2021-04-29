@@ -11,6 +11,7 @@ class Paint():
 
     def __init__(self):
         self.tk = Tk()
+        self.tk.title('Map Creation')
 
         self.save_button = Button(self.tk, text='Save', command=self.save)
         self.save_button.grid(row=0, column=0)
