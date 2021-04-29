@@ -190,6 +190,7 @@ void RRT::add_node(int exp) {
     Node* q_rand = new Node;
     Node* q_step = new Node;
 
+    // sample the goal as q_rand with (100 - exploration_factor) % probability
     if (exp > exploration_factor) {
       q_rand = goal;
     } else {

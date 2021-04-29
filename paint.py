@@ -55,6 +55,9 @@ class Paint():
         image = Image.open(filename + '.eps')
         image.save(filename + '.png', 'png')
 
+        print('Image was saved successfully.')
+        quit()
+
     def erase(self):
         self.canvas.delete('all')
 
