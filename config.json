@@ -1,0 +1,32 @@
+{
+    "_comment1": "paint config",
+    "screen_width": 600,
+    "screen_height": 600,
+    "default_brush_size": 6,
+    "default_brush_color": "black",
+    "_comment2": "RRT parameters",
+    "step_size": 10,
+    "exploration_factor": 90,
+    "_comment3": "start and goal nodes config",
+    "node_size": 5,
+    "start_position": {
+        "x": 107,
+        "y": 75
+    },
+    "goal_position": {
+        "x": 486,
+        "y": 471
+    },
+    "start_color": {
+        "b": 255,
+        "g": 0,
+        "r": 0,
+        "color_name": "blue"
+    },
+    "goal_color": {
+        "b": 0,
+        "g": 255,
+        "r": 0,
+        "color_name": "green"
+    }
+}
