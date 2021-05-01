@@ -10,12 +10,12 @@
     "_comment3": "start and goal nodes config",
     "node_size": 5,
     "start_position": {
-        "x": 107,
-        "y": 75
+        "x": 86,
+        "y": 92
     },
     "goal_position": {
-        "x": 486,
-        "y": 471
+        "x": 430,
+        "y": 444
     },
     "start_color": {
         "b": 255,

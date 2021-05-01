@@ -1,42 +1,68 @@
 
+#include "libs/json.hpp"
 #include "rrt.h"
+#include <typeinfo>
+
+string config_filename = "config.json";
+
+json load_config() {
+    ifstream i(config_filename);
+    json config;
+    i >> config;
+
+    return config;
+}
 
 RRT::RRT() {
+    config = load_config();
     total_nodes = 0;
     reached = false;
-    step_size = 10;
-    exploration_factor = 90;
+
+    step_size = config["step_size"].get<int>();
+    exploration_factor = config["exploration_factor"].get<int>();
 
     image = imread("./map.png", CV_LOAD_IMAGE_COLOR);
+    screen_width = image.cols;
+    screen_height = image.rows;
 
     start = new Node;
-    start->position.x = 50;
-    start->position.y = 50;
+    find_node_by_color(start, config["start_color"]["r"].get<int>(), config["start_color"]["g"].get<int>(), config["start_color"]["b"].get<int>());
     start->parent = NULL;
-    set_color(start->position, 5, 255, 0, 0); // set start node to blue
+    // set_color(start->position, 5, 255, 0, 0); // set start node to blue
     nodes[total_nodes++] = start;
 
     goal = new Node;
-    goal->position.x = 300;
-    goal->position.y = 300;
-    set_color(goal->position, 5, 0, 255, 0);   // set goal node to green
+    find_node_by_color(goal, config["goal_color"]["r"].get<int>(), config["goal_color"]["g"].get<int>(), config["goal_color"]["b"].get<int>());
+    // set_color(goal->position, 10, 255, 255, 255);   // set goal node to green
 
     srand(time(NULL));  // calling time with NULL returns the current system time
 }
 
+void RRT::find_node_by_color(Node* &node, int r, int g, int b) {
+    for(int i = 0; i < image.cols; i++) {
+      for(int j = 0; j < image.rows; j++) {
+        if ((image.at<Vec3b>(i,j)[0] == b) && (image.at<Vec3b>(i,j)[1] == g) && (image.at<Vec3b>(i,j)[2] == r)) {
+            node->position.x = (i-1) % screen_width;
+            node->position.y = (j-1) % screen_height;
+
+            return ;
+        }
+      }
+    }
+}
 
 bool RRT::within_bounds(int x, int y) {
     // check if coordinates within bounds of the image
-    if ((x < 0) || (x > WIDTH) || (y < 0) || (y > HEIGHT))
+    if ((x < 0) || (x > screen_width) || (y < 0) || (y > screen_height))
       return false;
 
     return true;
 }
 
-void RRT::set_color(coordinates &n, int offset, int b, int g, int r) {
+void RRT::set_color(coordinates &node, int offset, int b, int g, int r) {
   // set BGR values of offset height and width to demarcate nodes
-  for(int i = n.x - offset; i < n.x + offset; i++) {
-    for (int j = n.x - offset; j < n.y + offset; j++) {
+  for(int i = node.x - offset; i < node.x + offset; i++) {
+    for (int j = node.x - offset; j < node.y + offset; j++) {
         if (!within_bounds(i, j))
           continue;
 
@@ -121,7 +147,7 @@ bool RRT::check_path_along_height(coordinates &q1, coordinates &q2) {
       int y1 = (int)( (slope*x1) - (slope*low.x) + low.y );
       int y2 = y1 + 1;
       // checks if index is out of bounds
-      if ( (x1 < 0) || (x1 > WIDTH) || (y1 < 0) || (y1 > HEIGHT) || (y2 < 0) || (y2 > HEIGHT) )
+      if ( (x1 < 0) || (x1 > screen_width) || (y1 < 0) || (y1 > screen_height) || (y2 < 0) || (y2 > screen_height) )
         continue;
       // checks if image color is white (free) or not
       if (check_for_obstruction(x1, y1))
@@ -157,7 +183,7 @@ bool RRT::check_path_along_width(coordinates &q1, coordinates &q2) {
       int x1 = (int)( ((y1 - low.y)/slope) + low.x );
       int x2 = x1 + 1;
       // checks if index is out of bounds
-      if ( (y1 < 0) || (y1 > HEIGHT) || (x1 < 0) || (x1 > WIDTH) || (x2 < 0) || (x2 > WIDTH) )
+      if ( (y1 < 0) || (y1 > screen_height) || (x1 < 0) || (x1 > screen_width) || (x2 < 0) || (x2 > screen_width) )
         continue;
       // checks if image color is white (free) or not
       if (check_for_obstruction(x1, y1))
@@ -194,8 +220,8 @@ void RRT::add_node(int exp) {
     if (exp > exploration_factor) {
       q_rand = goal;
     } else {
-      q_rand->position.x = rand() % WIDTH + 1;
-      q_rand->position.y = rand() % HEIGHT + 1;
+      q_rand->position.x = rand() % screen_width + 1;
+      q_rand->position.y = rand() % screen_height + 1;
     }
 
     int q_near_index = find_nearest_node(q_rand);

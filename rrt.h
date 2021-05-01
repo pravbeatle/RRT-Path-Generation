@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 
 #include <vector>
 #include <math.h>
@@ -16,10 +17,9 @@
 
 using namespace cv;
 using namespace std;
+using namespace nlohmann;
 
 #define MAX_NODES 5000
-#define WIDTH 600
-#define HEIGHT 600
 
 typedef struct {
   int x;
@@ -37,6 +37,7 @@ class RRT {
   public:
     RRT();
     bool within_bounds(int x, int y);
+    void find_node_by_color(Node *&node, int r, int g, int b);
     void set_color(coordinates &n, int offset, int b, int g, int r);
     float calculate_distance(coordinates &p, coordinates &q);
     int find_nearest_node(Node *q_rand);
@@ -54,7 +55,10 @@ class RRT {
     bool reached;
     int exploration_factor;
     int step_size;
+    int screen_width;
+    int screen_height;
     Mat image;
+    json config;
 };
 
 #endif
