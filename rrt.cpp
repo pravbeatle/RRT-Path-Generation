@@ -114,10 +114,10 @@ coordinates RRT::take_step(coordinates &q_near, coordinates &q_rand) {
 }
 
 bool RRT::check_for_obstruction(int x, int y) {
-    // checks in the image if color is black (hence not free)
-    if ( ((int)image.at<Vec3b>(x, y)[0] < 30) &&
-          ((int)image.at<Vec3b>(x, y)[1] < 30) &&
-          ((int)image.at<Vec3b>(x, y)[2] < 30) )
+    // checks in the image if color is other than white (hence not free)
+    if ( ((int)image.at<Vec3b>(x, y)[0] < 250) &&
+          ((int)image.at<Vec3b>(x, y)[1] < 250) &&
+          ((int)image.at<Vec3b>(x, y)[2] < 250) )
       return true;
 
     return false;
