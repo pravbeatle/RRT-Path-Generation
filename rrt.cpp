@@ -114,16 +114,16 @@ coordinates RRT::take_step(coordinates &q_near, coordinates &q_rand) {
 }
 
 bool RRT::check_for_obstruction(int x, int y) {
-    // checks in the image if color is not white (hence not free)
-    if ( ((int)image.at<Vec3b>(x, y)[0] < 250) &&
-          ((int)image.at<Vec3b>(x, y)[1] < 250) &&
-          ((int)image.at<Vec3b>(x, y)[2] < 250) )
+    // checks in the image if color is black (hence not free)
+    if ( ((int)image.at<Vec3b>(x, y)[0] < 30) &&
+          ((int)image.at<Vec3b>(x, y)[1] < 30) &&
+          ((int)image.at<Vec3b>(x, y)[2] < 30) )
       return true;
 
     return false;
 }
 
-bool RRT::check_path_along_height(coordinates &q1, coordinates &q2) {
+bool RRT::check_path_along_width(coordinates &q1, coordinates &q2) {
     // check the straight line between q_near and q_rand
     // to see if it passes through any obstacles
     coordinates low, high;
@@ -159,7 +159,7 @@ bool RRT::check_path_along_height(coordinates &q1, coordinates &q2) {
     return true;
 }
 
-bool RRT::check_path_along_width(coordinates &q1, coordinates &q2) {
+bool RRT::check_path_along_height(coordinates &q1, coordinates &q2) {
     // check the straight line between q_near and q_rand
     // to see if it passes through any obstacles
     coordinates low, high;
@@ -230,7 +230,7 @@ void RRT::add_node(int exp) {
     else
       q_step->position = take_step(nodes[q_near_index]->position, q_rand->position);
 
-    if ( check_path_along_height(nodes[q_near_index]->position, q_rand->position) && check_path_along_width(nodes[q_near_index]->position, q_rand->position) ) {
+    if ( check_path_along_width(nodes[q_near_index]->position, q_rand->position) && check_path_along_height(nodes[q_near_index]->position, q_rand->position) ) {
       nodes[total_nodes++] = q_step;
       q_step->parent = nodes[q_near_index];
       nodes[q_near_index]->children.push_back(q_step);
@@ -239,7 +239,7 @@ void RRT::add_node(int exp) {
 
       // set_color(q_step->position, 2.0, 0, 255, 0);  // yellow marking of step nodes
 
-      if( check_path_along_height(q_step->position, goal->position) && check_path_along_width(q_step->position, goal->position) && (calculate_distance(q_step->position, goal->position) < step_size) ) {
+      if( check_path_along_width(q_step->position, goal->position) && check_path_along_height(q_step->position, goal->position) && (calculate_distance(q_step->position, goal->position) < step_size) ) {
         reached = true;
         nodes[total_nodes++] = goal;
         goal->parent = q_step;
